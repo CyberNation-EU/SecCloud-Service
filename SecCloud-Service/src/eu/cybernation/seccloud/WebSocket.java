@@ -4,6 +4,7 @@ package eu.cybernation.seccloud;
 import java.io.Console;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -19,6 +20,8 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import org.json.simple.*;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import eu.cybernation.seccloud.api.*;
 import eu.cybernation.seccloud.annotations.*;
@@ -63,20 +66,41 @@ public class WebSocket extends WebSocketServer{
 			Method[] methods = metaInfoProvider.getMethods();
 			ArrayList<JSONObject> mlist = new ArrayList<JSONObject>();
 			for (Method method : methods){
-				if(method.isAnnotationPresent(RemoteExecutable.class) && method.getAnnotation(RemoteExecutable.class).value() == true)
-				{
+				if(method.isAnnotationPresent(RemoteExecutable.class) && method.getAnnotation(RemoteExecutable.class).value() == true){
 					JSONObject jObject = new JSONObject();
 					jObject.clear();
-					jObject.put("Name", method.getName());
-					jObject.put("Paramter", method.getParameters());
+					jObject.put("name", method.getName());
+					
+					//jObject.put("Paramter", method.getParameters());
+					ArrayList<JSONObject> plist = new ArrayList<JSONObject>();
+					for ( Parameter p :  method.getParameters()){
+						JSONObject jObjPar = new JSONObject();
+						jObjPar.put("name", p.getName());
+						jObjPar.put("type", p.getType());
+						plist.add(jObjPar);
+					}
+					jObject.put("paramters", plist);
 					mlist.add(jObject);
 				}
 			}
 			JSONArray jsArray = new JSONArray(mlist);
 			response = jsArray.toJSONString();
 		}
-		else
-		{
+		else{
+			JSONParser parser = new JSONParser();
+			
+			try {
+				JSONObject req = (JSONObject)parser.parse(message);
+				if( req.get("request-type") == "info" ){
+					
+				}
+				
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			
+			
+			
 			response = "invalid request";
 		}
 		
