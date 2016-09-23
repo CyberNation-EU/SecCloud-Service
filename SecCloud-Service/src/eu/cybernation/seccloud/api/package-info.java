@@ -5,4 +5,4 @@
  * @author twoDarkMessiah
  *
  */
-package eu.cybernation.seccloud;
+package eu.cybernation.seccloud.api;
